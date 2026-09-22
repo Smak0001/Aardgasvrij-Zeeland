@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Aardgasvrij Zeeland Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Provincie Zeeland RES</p>
+        <h1>Aardgasvrij startkansen dashboard</h1>
+      </div>
+      <div id="dataStatus" class="status-pill" aria-label="Status van de databron">Data laden</div>
+    </header>
+
+    <main class="dashboard">
+      <aside class="sidebar" aria-label="Navigatie en filters">
+        <nav class="page-nav" aria-label="Dashboard pagina's">
+          <button class="nav-button active" type="button" data-page="overview">Overzicht</button>
+          <button class="nav-button" type="button" data-page="map">Kansenkaart</button>
+          <button class="nav-button" type="button" data-page="scan">Woningscan</button>
+          <button class="nav-button" type="button" data-page="data">Data & methode</button>
+        </nav>
+
+      <section class="filters" aria-label="Filters">
+        <div class="panel-title">
+          <span class="icon" aria-hidden="true">⌁</span>
+          <h2>Filters</h2>
+        </div>
+
+        <label for="gemeente">Gemeente</label>
+        <select id="gemeente">
+          <option value="alle">Alle gemeenten</option>
+        </select>
+
+        <label for="scenario">Warmtetransitiepad</label>
+        <select id="scenario">
+          <option value="all-electric">All-electric</option>
+          <option value="hybride">Hybride warmtepomp</option>
+          <option value="warmtenet">Warmtenet</option>
+        </select>
+
+        <label for="horizon">Financiële horizon</label>
+        <div class="segmented" role="group" aria-label="Financiële horizon">
+          <button class="segment" data-horizon="10">10 jaar</button>
+          <button class="segment active" data-horizon="20">20 jaar</button>
+          <button class="segment" data-horizon="30">30 jaar</button>
+        </div>
+
+        <label for="maxCost">Maximale netto investering per woning</label>
+        <input id="maxCost" type="range" min="10000" max="36000" value="36000" step="1000" />
+        <output id="maxCostValue" for="maxCost">€36.000</output>
+
+        <button id="resetFilters" class="secondary-button" type="button">Reset filters</button>
+        <a id="exportCsv" class="primary-button" href="/api/export.csv">Exporteer CSV</a>
+      </section>
+      </aside>
+
+      <section class="content">
+        <section class="page active" data-page-panel="overview">
+          <section class="kpis" aria-label="Kerncijfers">
+            <article class="kpi">
+              <span>Woningen in selectie</span>
+              <strong id="kpiHomes">0</strong>
+            </article>
+            <article class="kpi">
+              <span>Gem. netto investering</span>
+              <strong id="kpiCost">€0</strong>
+            </article>
+            <article class="kpi">
+              <span>Gem. besparing per jaar</span>
+              <strong id="kpiSaving">€0</strong>
+            </article>
+            <article class="kpi">
+              <span>CO₂-reductie per jaar</span>
+              <strong id="kpiCo2">0 ton</strong>
+            </article>
+            <article class="kpi">
+              <span>Gem. datakwaliteit</span>
+              <strong id="kpiDataQuality">0%</strong>
+            </article>
+          </section>
+
+          <section class="hero-panel">
+            <div>
+              <p class="eyebrow dark">Opdracht Provincie Zeeland RES</p>
+              <h2>Waar kan Zeeland logisch starten met aardgasvrij wonen?</h2>
+              <p id="centralQuestion">Data laden...</p>
+            </div>
+            <div class="zeeland-mark" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </section>
+
+          <section class="scope-grid">
+            <article class="info-panel">
+              <h2>Client meeting focus</h2>
+              <p id="scopeText">Data laden...</p>
+              <span id="scopeLevel" class="wide-badge">wijk/dorp</span>
+            </article>
+            <article class="info-panel">
+              <h2>Voor gemeenten en netbeheerder</h2>
+              <p>Gebruik de kansenkaart om wijken of dorpen te vinden waar techniek, kosten en infrastructuur gunstig samenkomen.</p>
+            </article>
+            <article class="info-panel">
+              <h2>Voor inwoners</h2>
+              <p id="residentQuestion">Bekijk wat verduurzaming ongeveer kost, welke maatregelen nodig zijn en wat het financieel kan opleveren.</p>
+            </article>
+          </section>
+
+          <section class="goals-panel">
+            <div>
+              <h2>RES-doelen die in de opdracht genoemd worden</h2>
+              <ul id="resGoals" class="chip-list"></ul>
+            </div>
+            <div>
+              <h2>Maatschappelijke waarde</h2>
+              <ul id="sdgList" class="chip-list"></ul>
+            </div>
+          </section>
+        </section>
+
+        <section class="page" data-page-panel="map">
+          <section class="workgrid">
+            <article class="map-panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Kansenkaart dorpen en wijken</h2>
+                  <p id="topWijk">Beste startkans: -</p>
+                </div>
+                <div class="legend" aria-label="Legenda">
+                  <span><i class="high"></i> Hoog</span>
+                  <span><i class="mid"></i> Midden</span>
+                  <span><i class="low"></i> Laag</span>
+                </div>
+              </div>
+              <div id="map" class="map" aria-label="Kaart met wijkscores"></div>
+            </article>
+
+            <article class="chart-panel">
+              <div class="panel-header">
+                <div>
+                  <h2>Top startkansen</h2>
+                  <p>Kansscore combineert kosten, isolatie, netcapaciteit en draagvlak.</p>
+                </div>
+              </div>
+              <div id="barChart" class="bar-chart" aria-label="Staafdiagram met startkansen"></div>
+            </article>
+          </section>
+
+          <section class="detail-panel">
+            <div class="panel-header">
+              <div>
+                <h2 id="detailTitle">Wijkadvies</h2>
+                <p id="detailSubtitle">Klik op een dorp/wijk op de kaart of in de tabel.</p>
+              </div>
+              <span id="detailScore" class="score-badge">Score 0</span>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-card">
+                <span>Geschatte netto investering</span>
+                <strong id="detailInvestment">€0</strong>
+              </div>
+              <div class="detail-card">
+                <span>Jaarlijkse besparing</span>
+                <strong id="detailSaving">€0</strong>
+              </div>
+              <div class="detail-card">
+                <span>Terugverdientijd</span>
+                <strong id="detailPayback">0 jaar</strong>
+              </div>
+              <div class="detail-card">
+                <span>Startstrategie</span>
+                <strong id="detailStrategy">-</strong>
+              </div>
+              <div class="detail-card">
+                <span>Datakwaliteit</span>
+                <strong id="detailDataQuality">0%</strong>
+              </div>
+              <div class="detail-card">
+                <span>Maatschappelijke investering</span>
+                <strong id="detailSocialCost">€0</strong>
+              </div>
+            </div>
+            <div class="advice-grid">
+              <div>
+                <h3>Aanbevolen maatregelen</h3>
+                <ul id="detailMeasures"></ul>
+              </div>
+              <div>
+                <h3>Waarom kansrijk?</h3>
+                <p id="detailWhy"></p>
+              </div>
+              <div>
+                <h3>Score-opbouw</h3>
+                <dl id="detailScoreBreakdown" class="score-breakdown"></dl>
+              </div>
+            </div>
+          </section>
+
+          <section class="table-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Wijkvergelijking</h2>
+                <p>Rangschikking op kansscore binnen de gekozen filters.</p>
+              </div>
+              <span id="avgScore" class="score-badge">Score 0</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Wijk</th>
+                    <th>Gemeente</th>
+                    <th>Energieprofiel</th>
+                    <th>Strategie</th>
+                    <th>Netto investering</th>
+                    <th>Wijkinvestering</th>
+                    <th>Besparing/jaar</th>
+                    <th>Terugverdientijd</th>
+                    <th>Kansscore</th>
+                  </tr>
+                </thead>
+                <tbody id="wijkTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="page" data-page-panel="scan">
+          <section class="resident-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Woningscan voor inwoners</h2>
+                <p>Bekijk indicatief wat aardgasvrij of aardgasvrij-ready maken betekent voor een woning en vergelijk dit met de geselecteerde wijk.</p>
+              </div>
+              <span class="score-badge">10 / 20 / 30 jaar</span>
+            </div>
+            <div class="scan-grid">
+              <div class="scan-form">
+                <label for="scanType">Woningtype</label>
+                <select id="scanType">
+                  <option value="rijwoning">Rijwoning</option>
+                  <option value="hoekwoning">Hoekwoning / 2-onder-1-kap</option>
+                  <option value="vrijstaand">Vrijstaande woning</option>
+                  <option value="appartement">Appartement</option>
+                </select>
+
+                <label for="scanLabel">Energieprofiel</label>
+                <select id="scanLabel">
+                  <option value="A/B">A/B</option>
+                  <option value="C" selected>C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F/G">F/G</option>
+                </select>
+
+                <label for="scanYear">Bouwjaar</label>
+                <input id="scanYear" type="number" min="1850" max="2026" value="1975" />
+
+                <label for="scanSurface">Oppervlakte m²</label>
+                <input id="scanSurface" type="number" min="35" max="450" value="115" />
+
+                <label for="scanGas">Gasverbruik m³/jaar</label>
+                <input id="scanGas" type="number" min="0" max="5000" value="1200" />
+
+                <label for="scanElectricity">Elektriciteit kWh/jaar</label>
+                <input id="scanElectricity" type="number" min="0" max="12000" value="2900" />
+              </div>
+
+              <div class="scan-results">
+                <div class="scan-card">
+                  <span>Bruto investering</span>
+                  <strong id="scanGross">€0</strong>
+                </div>
+                <div class="scan-card">
+                  <span>Na subsidie te financieren</span>
+                  <strong id="scanNet">€0</strong>
+                </div>
+                <div class="scan-card">
+                  <span>Besparing per jaar</span>
+                  <strong id="scanSaving">€0</strong>
+                </div>
+                <div class="scan-card">
+                  <span>CO₂-reductie per jaar</span>
+                  <strong id="scanCo2">0 kg</strong>
+                </div>
+                <div class="scan-timeline">
+                  <h3>Financieel voordeel</h3>
+                  <div id="scanTimeline"></div>
+                </div>
+                <div class="scan-comparison">
+                  <h3>Vergelijking met wijk</h3>
+                  <p id="scanComparison">Selecteer een wijk op de kaart of in de tabel.</p>
+                </div>
+                <div class="scan-measures">
+                  <h3>Maatregelen en financiering</h3>
+                  <ul id="scanMeasures"></ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="page" data-page-panel="data">
+          <section class="method-grid">
+            <article class="method-panel">
+              <h2>Databronnen en beschikbaarheid</h2>
+              <div id="dataSources" class="source-grid" aria-label="Databronnen en beschikbaarheid"></div>
+            </article>
+            <article class="method-panel">
+              <h2>Wat is echt en wat is model?</h2>
+              <div class="source-grid compact">
+                <div class="source-card">
+                  <span class="source-status">Echte data</span>
+                  <strong>CBS/PDOK</strong>
+                  <p>Woningvoorraad, gemiddeld gasverbruik, elektriciteitsverbruik en wijklocatie.</p>
+                </div>
+                <div class="source-card">
+                  <span class="source-status">Model</span>
+                  <strong>Prototype-berekeningen</strong>
+                  <p>Energieprofiel, kosten, subsidie, draagvlak, netcapaciteit en kansscore.</p>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="method-panel">
+            <h2>Scoremethode</h2>
+            <div class="formula-grid">
+              <div><strong>36%</strong><span>Financieel</span></div>
+              <div><strong>23%</strong><span>Isolatie</span></div>
+              <div><strong>21%</strong><span>Netcapaciteit</span></div>
+              <div><strong>20%</strong><span>Draagvlak</span></div>
+            </div>
+            <p>De score is bedoeld als startpunt voor gesprek, niet als definitief besluit. De transcriptie maakt duidelijk dat lokale politiek, dorpsraden, draagvlak en aanvullende data mee moeten wegen.</p>
+          </section>
+
+          <section class="method-panel">
+            <h2>Open datavragen voor sprint 1</h2>
+            <ul class="task-list">
+              <li>Welke Klimaatmonitor-velden zijn direct bruikbaar voor wijk- of dorpsniveau?</li>
+              <li>Kan de opdrachtgever helpen met officiële energielabeldata via EP-online/RVO?</li>
+              <li>Welke informatie over netcongestie/netcapaciteit mag gebruikt worden?</li>
+              <li>Welke lokale data bestaat er over draagvlak, dorpsraden en gemeentelijke warmteplannen?</li>
+              <li>Past de technische keuze op langere termijn binnen Power BI, ABF of het provinciale dataportaal?</li>
+            </ul>
+          </section>
+
+          <section class="method-panel">
+            <div>
+              <h2>Gebruikte aannames</h2>
+              <dl id="assumptionList" class="assumption-list"></dl>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
