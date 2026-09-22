@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kansenkaart | Aardgasvrij Zeeland</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="map">
+    <div id="appHeader"></div>
+    <main class="dashboard">
+      <aside id="appSidebar" class="sidebar" aria-label="Navigatie en filters"></aside>
+      <section class="content">
+        <section class="page active">
+          <section class="workgrid">
+            <article class="map-panel">
+              <div class="panel-header">
+                <div><h2>Kansenkaart dorpen en wijken</h2><p id="topWijk">Beste startkans: -</p></div>
+                <div class="legend" aria-label="Legenda">
+                  <span><i class="high"></i> Hoog</span>
+                  <span><i class="mid"></i> Midden</span>
+                  <span><i class="low"></i> Laag</span>
+                </div>
+              </div>
+              <div id="map" class="map" aria-label="Kaart met wijkscores"></div>
+            </article>
+
+            <article class="chart-panel">
+              <div class="panel-header">
+                <div><h2>Top startkansen</h2><p>Kansscore combineert kosten, isolatie, netcapaciteit en draagvlak.</p></div>
+              </div>
+              <div id="barChart" class="bar-chart" aria-label="Staafdiagram met startkansen"></div>
+            </article>
+          </section>
+
+          <section class="detail-panel">
+            <div class="panel-header">
+              <div><h2 id="detailTitle">Wijkadvies</h2><p id="detailSubtitle">Klik op een dorp/wijk op de kaart of in de tabel.</p></div>
+              <span id="detailScore" class="score-badge">Score 0</span>
+            </div>
+            <div class="detail-grid">
+              <div class="detail-card"><span>Geschatte netto investering</span><strong id="detailInvestment">€0</strong></div>
+              <div class="detail-card"><span>Jaarlijkse besparing</span><strong id="detailSaving">€0</strong></div>
+              <div class="detail-card"><span>Terugverdientijd</span><strong id="detailPayback">0 jaar</strong></div>
+              <div class="detail-card"><span>Startstrategie</span><strong id="detailStrategy">-</strong></div>
+              <div class="detail-card"><span>Datakwaliteit</span><strong id="detailDataQuality">0%</strong></div>
+              <div class="detail-card"><span>Maatschappelijke investering</span><strong id="detailSocialCost">€0</strong></div>
+            </div>
+            <div class="advice-grid">
+              <div><h3>Aanbevolen maatregelen</h3><ul id="detailMeasures"></ul></div>
+              <div><h3>Waarom kansrijk?</h3><p id="detailWhy"></p></div>
+              <div><h3>Score-opbouw</h3><dl id="detailScoreBreakdown" class="score-breakdown"></dl></div>
+            </div>
+          </section>
+
+          <section class="table-panel">
+            <div class="panel-header">
+              <div><h2>Wijkvergelijking</h2><p>Rangschikking op kansscore binnen de gekozen filters.</p></div>
+              <span id="avgScore" class="score-badge">Score 0</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Wijk</th><th>Gemeente</th><th>Energieprofiel</th><th>Strategie</th>
+                    <th>Netto investering</th><th>Wijkinvestering</th><th>Besparing/jaar</th>
+                    <th>Terugverdientijd</th><th>Kansscore</th>
+                  </tr>
+                </thead>
+                <tbody id="wijkTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script src="/page-shell.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
+

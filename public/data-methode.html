@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data & methode | Aardgasvrij Zeeland</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="data">
+    <div id="appHeader"></div>
+    <main class="dashboard">
+      <aside id="appSidebar" class="sidebar" aria-label="Navigatie en filters"></aside>
+      <section class="content">
+        <section class="page active">
+          <section class="method-grid">
+            <article class="method-panel">
+              <h2>Databronnen en beschikbaarheid</h2>
+              <div id="dataSources" class="source-grid" aria-label="Databronnen en beschikbaarheid"></div>
+            </article>
+            <article class="method-panel">
+              <h2>Wat is echt en wat is model?</h2>
+              <div class="source-grid compact">
+                <div class="source-card"><span class="source-status">Echte data</span><strong>CBS/PDOK en PBL</strong><p>Woningvoorraad, gemiddeld energiegebruik, wijklocatie en openbare PBL-indicatoren.</p></div>
+                <div class="source-card"><span class="source-status">Model</span><strong>Prototype-berekeningen</strong><p>Kosten, subsidie, draagvlak, netcapaciteit en kansscore.</p></div>
+              </div>
+            </article>
+          </section>
+
+          <section class="method-panel">
+            <h2>Scoremethode</h2>
+            <div class="formula-grid">
+              <div><strong>36%</strong><span>Financieel</span></div>
+              <div><strong>23%</strong><span>Isolatie</span></div>
+              <div><strong>21%</strong><span>Netcapaciteit</span></div>
+              <div><strong>20%</strong><span>Draagvlak</span></div>
+            </div>
+            <p>De score is bedoeld als startpunt voor gesprek, niet als definitief besluit. Lokale politiek, dorpsraden, draagvlak en aanvullende data moeten ook worden meegewogen.</p>
+          </section>
+
+          <section class="method-panel">
+            <h2>Open datavragen voor sprint 1</h2>
+            <ul class="task-list">
+              <li>Welke Klimaatmonitor-velden zijn direct bruikbaar voor wijk- of dorpsniveau?</li>
+              <li>Kan de opdrachtgever helpen met officiële energielabeldata via EP-online/RVO?</li>
+              <li>Welke informatie over netcongestie en netcapaciteit mag gebruikt worden?</li>
+              <li>Welke lokale data bestaat er over draagvlak, dorpsraden en gemeentelijke warmteplannen?</li>
+              <li>Past de technische keuze op langere termijn binnen Power BI, ABF of het provinciale dataportaal?</li>
+            </ul>
+          </section>
+
+          <section class="method-panel"><div><h2>Gebruikte aannames</h2><dl id="assumptionList" class="assumption-list"></dl></div></section>
+        </section>
+      </section>
+    </main>
+    <script src="/page-shell.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

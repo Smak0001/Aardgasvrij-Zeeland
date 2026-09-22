@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Woningscan | Aardgasvrij Zeeland</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body data-page="scan">
+    <div id="appHeader"></div>
+    <main class="dashboard">
+      <aside id="appSidebar" class="sidebar" aria-label="Navigatie en filters"></aside>
+      <section class="content">
+        <section class="page active">
+          <section class="resident-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Woningscan voor inwoners</h2>
+                <p>Bekijk indicatief wat aardgasvrij of aardgasvrij-ready maken betekent voor een woning en vergelijk dit met de geselecteerde wijk.</p>
+              </div>
+              <span class="score-badge">10 / 20 / 30 jaar</span>
+            </div>
+            <div class="scan-grid">
+              <div class="scan-form">
+                <label for="scanType">Woningtype</label>
+                <select id="scanType">
+                  <option value="rijwoning">Rijwoning</option>
+                  <option value="hoekwoning">Hoekwoning / 2-onder-1-kap</option>
+                  <option value="vrijstaand">Vrijstaande woning</option>
+                  <option value="appartement">Appartement</option>
+                </select>
+
+                <label for="scanLabel">Energieprofiel</label>
+                <select id="scanLabel">
+                  <option value="A/B">A/B</option><option value="C">C</option><option value="D">D</option>
+                  <option value="E">E</option><option value="F/G">F/G</option>
+                </select>
+
+                <label for="scanYear">Bouwjaar</label>
+                <input id="scanYear" type="number" min="1850" max="2026" value="1975" />
+                <label for="scanSurface">Oppervlakte m²</label>
+                <input id="scanSurface" type="number" min="35" max="450" value="115" />
+                <label for="scanGas">Gasverbruik m³/jaar</label>
+                <input id="scanGas" type="number" min="0" max="5000" value="1200" />
+                <label for="scanElectricity">Elektriciteit kWh/jaar</label>
+                <input id="scanElectricity" type="number" min="0" max="12000" value="2900" />
+              </div>
+
+              <div class="scan-results">
+                <div class="scan-card"><span>Bruto investering</span><strong id="scanGross">€0</strong></div>
+                <div class="scan-card"><span>Na subsidie te financieren</span><strong id="scanNet">€0</strong></div>
+                <div class="scan-card"><span>Besparing per jaar</span><strong id="scanSaving">€0</strong></div>
+                <div class="scan-card"><span>CO₂-reductie per jaar</span><strong id="scanCo2">0 kg</strong></div>
+                <div class="scan-timeline"><h3>Financieel voordeel</h3><div id="scanTimeline"></div></div>
+                <div class="scan-comparison"><h3>Vergelijking met wijk</h3><p id="scanComparison">Selecteer een wijk op de kansenkaart om te vergelijken.</p></div>
+                <div class="scan-measures"><h3>Maatregelen en financiering</h3><ul id="scanMeasures"></ul></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+    <script src="/page-shell.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
+

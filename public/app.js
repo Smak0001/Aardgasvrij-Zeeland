@@ -1,4 +1,4 @@
-const state = {
+const defaultState = {
   gemeente: "alle",
   scenario: "all-electric",
   horizon: 20,
@@ -13,6 +13,25 @@ const state = {
     elek_kwh: 2900,
   },
 };
+
+function loadSavedState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("aardgasvrij-dashboard-state") || "{}");
+    return {
+      ...defaultState,
+      ...saved,
+      scan: { ...defaultState.scan, ...(saved.scan || {}) },
+    };
+  } catch {
+    return { ...defaultState, scan: { ...defaultState.scan } };
+  }
+}
+
+const state = loadSavedState();
+
+function saveState() {
+  localStorage.setItem("aardgasvrij-dashboard-state", JSON.stringify(state));
+}
 
 const mapState = {
   initialized: false,
@@ -37,7 +56,6 @@ const el = {
   dataStatus: document.querySelector("#dataStatus"),
   resetFilters: document.querySelector("#resetFilters"),
   navButtons: document.querySelectorAll(".nav-button"),
-  pagePanels: document.querySelectorAll("[data-page-panel]"),
   segments: document.querySelectorAll(".segment"),
   kpiHomes: document.querySelector("#kpiHomes"),
   kpiCost: document.querySelector("#kpiCost"),
@@ -131,8 +149,9 @@ async function loadData() {
   if (!response.ok) throw new Error("Data kon niet worden geladen");
   const data = await response.json();
   renderGemeenten(data.meta.gemeenten);
+  syncControls();
   renderDashboard(data);
-  el.exportCsv.href = `/api/export.csv?${params()}`;
+  if (el.exportCsv) el.exportCsv.href = `/api/export.csv?${params()}`;
 }
 
 async function loadHomeScan() {
@@ -148,15 +167,17 @@ function scheduleLoad() {
 }
 
 function scheduleScan() {
+  if (!el.scanGross) return;
   window.clearTimeout(scanTimer);
   scanTimer = window.setTimeout(() => {
     loadHomeScan().catch(() => {
-      el.scanComparison.textContent = "De woningscan kon niet worden geladen.";
+      if (el.scanComparison) el.scanComparison.textContent = "De woningscan kon niet worden geladen.";
     });
   }, 160);
 }
 
 function renderGemeenten(gemeenten) {
+  if (!el.gemeente) return;
   if (el.gemeente.options.length > 1) return;
   gemeenten.forEach((gemeente) => {
     const option = document.createElement("option");
@@ -168,54 +189,61 @@ function renderGemeenten(gemeenten) {
 
 function renderDashboard(data) {
   const { overview, rows } = data;
-  el.dataStatus.textContent = data.meta.source;
+  if (el.dataStatus) el.dataStatus.textContent = data.meta.source;
   if (!rows.some((row) => row.id === state.selectedId)) {
     state.selectedId = rows[0]?.id ?? null;
+    saveState();
   }
-  el.kpiHomes.textContent = number.format(overview.woningen);
-  el.kpiCost.textContent = euro.format(overview.gemiddelde_kosten);
-  el.kpiSaving.textContent = euro.format(overview.gemiddelde_besparing);
-  el.kpiCo2.textContent = `${number.format(overview.totale_co2_ton)} ton`;
-  el.kpiDataQuality.textContent = `${overview.gemiddelde_datakwaliteit ?? 0}%`;
-  el.topWijk.textContent = `Beste startkans: ${overview.top_wijk}`;
-  el.avgScore.textContent = `Score ${overview.gemiddelde_score}`;
+  if (el.kpiHomes) el.kpiHomes.textContent = number.format(overview.woningen);
+  if (el.kpiCost) el.kpiCost.textContent = euro.format(overview.gemiddelde_kosten);
+  if (el.kpiSaving) el.kpiSaving.textContent = euro.format(overview.gemiddelde_besparing);
+  if (el.kpiCo2) el.kpiCo2.textContent = `${number.format(overview.totale_co2_ton)} ton`;
+  if (el.kpiDataQuality) el.kpiDataQuality.textContent = `${overview.gemiddelde_datakwaliteit ?? 0}%`;
+  if (el.topWijk) el.topWijk.textContent = `Beste startkans: ${overview.top_wijk}`;
+  if (el.avgScore) el.avgScore.textContent = `Score ${overview.gemiddelde_score}`;
   renderScope(data.meta);
-  renderMap(rows);
-  renderBars(rows.slice(0, 7));
-  renderTable(rows);
-  renderDetail(rows.find((row) => row.id === state.selectedId));
-  loadHomeScan().catch(() => {
-    el.scanComparison.textContent = "De woningscan kon niet worden geladen.";
-  });
+  if (el.map) renderMap(rows);
+  if (el.barChart) renderBars(rows.slice(0, 7));
+  if (el.table) renderTable(rows);
+  if (el.detailTitle) renderDetail(rows.find((row) => row.id === state.selectedId));
+  if (el.scanGross) {
+    loadHomeScan().catch(() => {
+      if (el.scanComparison) el.scanComparison.textContent = "De woningscan kon niet worden geladen.";
+    });
+  }
 }
 
 function renderScope(meta) {
   const scope = meta.project_scope || {};
-  el.centralQuestion.textContent = scope.central_question || "Wat kost aardgasvrij maken en waar kan Zeeland het beste starten?";
-  el.scopeText.textContent = `${scope.client_goal || ""} ${scope.success_definition || ""}`;
-  el.scopeLevel.textContent = scope.preferred_scale || "wijk/dorp";
-  el.residentQuestion.textContent = scope.resident_question || el.residentQuestion.textContent;
-  el.resGoals.innerHTML = (scope.res_2030_goals || [])
-    .map((goal) => `<li>${goal}</li>`)
-    .join("");
-  el.sdgList.innerHTML = (scope.sdgs || [])
-    .map((sdg) => `<li>${sdg}</li>`)
-    .join("");
-  el.dataSources.innerHTML = "";
-  (meta.data_sources || []).forEach((source) => {
-    const card = document.createElement("article");
-    card.className = "source-card";
-    card.innerHTML = `
-      <span class="source-status">${source.status}</span>
-      <strong>${source.name}</strong>
-      <p>${source.use}</p>
-      <small>${source.type} · ${source.risk}</small>
-    `;
-    el.dataSources.appendChild(card);
-  });
-  el.assumptionList.innerHTML = Object.entries(meta.assumptions || {})
-    .map(([key, value]) => `<div><dt>${formatAssumptionKey(key)}</dt><dd>${value}</dd></div>`)
-    .join("");
+  if (el.centralQuestion) el.centralQuestion.textContent = scope.central_question || "Wat kost aardgasvrij maken en waar kan Zeeland het beste starten?";
+  if (el.scopeText) el.scopeText.textContent = `${scope.client_goal || ""} ${scope.success_definition || ""}`;
+  if (el.scopeLevel) el.scopeLevel.textContent = scope.preferred_scale || "wijk/dorp";
+  if (el.residentQuestion) el.residentQuestion.textContent = scope.resident_question || el.residentQuestion.textContent;
+  if (el.resGoals) {
+    el.resGoals.innerHTML = (scope.res_2030_goals || []).map((goal) => `<li>${goal}</li>`).join("");
+  }
+  if (el.sdgList) {
+    el.sdgList.innerHTML = (scope.sdgs || []).map((sdg) => `<li>${sdg}</li>`).join("");
+  }
+  if (el.dataSources) {
+    el.dataSources.innerHTML = "";
+    (meta.data_sources || []).forEach((source) => {
+      const card = document.createElement("article");
+      card.className = "source-card";
+      card.innerHTML = `
+        <span class="source-status">${source.status}</span>
+        <strong>${source.name}</strong>
+        <p>${source.use}</p>
+        <small>${source.type} · ${source.risk}</small>
+      `;
+      el.dataSources.appendChild(card);
+    });
+  }
+  if (el.assumptionList) {
+    el.assumptionList.innerHTML = Object.entries(meta.assumptions || {})
+      .map(([key, value]) => `<div><dt>${formatAssumptionKey(key)}</dt><dd>${value}</dd></div>`)
+      .join("");
+  }
 }
 
 function formatAssumptionKey(key) {
@@ -473,6 +501,7 @@ function renderTable(rows) {
 }
 
 function renderHomeScan(data) {
+  if (!el.scanGross) return;
   const result = data.result || {};
   const comparison = data.comparison;
   el.scanGross.textContent = euro.format(result.bruto_investering || 0);
@@ -606,6 +635,7 @@ function scoreBreakdown(row) {
 
 function selectRow(id) {
   state.selectedId = id;
+  saveState();
   const selected = mapState.rows.find((row) => row.id === id);
   drawMarkers();
   renderTable(mapState.rows);
@@ -617,6 +647,7 @@ function selectRow(id) {
 }
 
 function syncControls() {
+  if (!el.gemeente || !el.scenario || !el.maxCost || !el.maxCostValue) return;
   el.gemeente.value = state.gemeente;
   el.scenario.value = state.scenario;
   el.maxCost.value = state.maxCost;
@@ -627,6 +658,7 @@ function syncControls() {
 }
 
 function syncScanControls() {
+  if (!el.scanType) return;
   el.scanType.value = state.scan.woningtype;
   el.scanLabel.value = state.scan.label;
   el.scanYear.value = state.scan.bouwjaar;
@@ -635,38 +667,16 @@ function syncScanControls() {
   el.scanElectricity.value = state.scan.elek_kwh;
 }
 
-function showPage(pageName) {
-  const availablePages = [...el.pagePanels].map((panel) => panel.dataset.pagePanel);
-  const nextPage = availablePages.includes(pageName) ? pageName : "overview";
-  el.pagePanels.forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.pagePanel === nextPage);
-  });
-  el.navButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.page === nextPage);
-  });
-  document.body.dataset.page = nextPage;
-  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  if (nextPage === "map") {
-    window.setTimeout(drawMap, 50);
-  }
-}
-
 function bindControls() {
-  el.navButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const pageName = button.dataset.page;
-      history.replaceState(null, "", `#${pageName}`);
-      showPage(pageName);
-    });
-  });
-
   el.gemeente.addEventListener("change", () => {
     state.gemeente = el.gemeente.value;
+    saveState();
     loadData();
   });
 
   el.scenario.addEventListener("change", () => {
     state.scenario = el.scenario.value;
+    saveState();
     loadData();
     scheduleScan();
   });
@@ -674,12 +684,14 @@ function bindControls() {
   el.maxCost.addEventListener("input", () => {
     state.maxCost = Number(el.maxCost.value);
     el.maxCostValue.textContent = euro.format(state.maxCost);
+    saveState();
     scheduleLoad();
   });
 
   el.segments.forEach((button) => {
     button.addEventListener("click", () => {
       state.horizon = Number(button.dataset.horizon);
+      saveState();
       syncControls();
       loadData();
     });
@@ -690,6 +702,7 @@ function bindControls() {
     state.scenario = "all-electric";
     state.horizon = 20;
     state.maxCost = 36000;
+    saveState();
     syncControls();
     syncScanControls();
     loadData();
@@ -704,26 +717,24 @@ function bindControls() {
     [el.scanElectricity, "elek_kwh", "number"],
   ];
 
-  scanBindings.forEach(([input, key, type]) => {
+  scanBindings.filter(([input]) => input).forEach(([input, key, type]) => {
     input.addEventListener("input", () => {
       state.scan[key] = type === "number" ? Number(input.value) : input.value;
+      saveState();
       scheduleScan();
     });
     input.addEventListener("change", () => {
       state.scan[key] = type === "number" ? Number(input.value) : input.value;
+      saveState();
       scheduleScan();
     });
   });
 }
 
-window.addEventListener("hashchange", () => {
-  showPage(location.hash.replace("#", "") || "overview");
-});
-
 bindControls();
 syncControls();
 syncScanControls();
-showPage(location.hash.replace("#", "") || "overview");
 loadData().catch((error) => {
-  el.table.innerHTML = `<tr><td colspan="9" class="empty">${error.message}</td></tr>`;
+  if (el.dataStatus) el.dataStatus.textContent = "Data niet beschikbaar";
+  if (el.table) el.table.innerHTML = `<tr><td colspan="9" class="empty">${error.message}</td></tr>`;
 });

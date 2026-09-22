@@ -64,10 +64,12 @@ De originele opdracht vraagt om inzicht in kosten en kansen van het aardgasvrij 
 
 Pagina-indeling:
 
-- `Overzicht`: centrale opdrachtvraag, KPI's, client-meeting focus, RES-doelen en SDG's.
-- `Kansenkaart`: interactieve OpenStreetMap-kaart, top-startkansen, wijkadvies en vergelijkingstabel.
-- `Woningscan`: inwonerformulier met financiële uitkomst en vergelijking met geselecteerde wijk.
-- `Data & methode`: databronnen, verschil tussen echte data en modelinschattingen, scoremethode en open datavragen.
+- `/index.html`: centrale opdrachtvraag, KPI's, client-meeting focus, RES-doelen en SDG's.
+- `/kansenkaart.html`: interactieve OpenStreetMap-kaart, top-startkansen, wijkadvies en vergelijkingstabel.
+- `/woningscan.html`: inwonerformulier met financiële uitkomst en vergelijking met geselecteerde wijk.
+- `/data-methode.html`: databronnen, verschil tussen echte data en modelinschattingen, scoremethode en open datavragen.
+
+Dit zijn vier losse HTML-pagina's. Filters en de geselecteerde wijk worden lokaal bewaard wanneer je via de navigatie naar een andere pagina gaat.
 
 Nog open voor latere sprints: echte EP-online energielabels, actuele subsidie- en leningregels, betere lokale data over draagvlak, bouw-/installatiecapaciteit en netcongestie.
 
