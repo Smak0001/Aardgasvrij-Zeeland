@@ -7,8 +7,11 @@ Eerste MVP voor het schoolproject rond startkansen voor aardgasvrije Zeeuwse wij
 ```powershell
 git clone https://github.com/Smak0001/Aardgasvrij-Zeeland.git
 cd Aardgasvrij-Zeeland
-python app.py
+git switch javascript-version
+node server.js
 ```
+
+Je kunt op een normale Node.js-installatie ook `npm start` gebruiken. Er zijn geen externe packages nodig.
 
 Open daarna:
 
@@ -18,7 +21,7 @@ http://127.0.0.1:8000
 
 ## Wat zit erin?
 
-- Python HTTP-server zonder externe packages.
+- JavaScript/Node.js HTTP-server zonder externe packages.
 - HTML/CSS/JavaScript dashboard met aparte pagina's voor overzicht, kansenkaart, woningscan en data/methode.
 - Filters voor gemeente, transitiepad, financiële horizon en maximale investering.
 - KPI's voor woningen, kosten, besparing en CO2-reductie.
@@ -69,6 +72,8 @@ Pagina-indeling:
 Nog open voor latere sprints: echte EP-online energielabels, actuele subsidie- en leningregels, betere lokale data over draagvlak, bouw-/installatiecapaciteit en netcongestie.
 
 ## Echte data opnieuw ophalen
+
+De applicatie zelf draait volledig op JavaScript. De bestaande importscripts voor het opnieuw ophalen en verwerken van brondata zijn voorlopig nog Python-hulpscripts:
 
 ```powershell
 python scripts\update_real_data.py
